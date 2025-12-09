@@ -36,7 +36,3 @@ This repository contains my work for the Software Testing Project in the **Funda
 ## Notes
 
 This project was completed as part of the **Fundamentals of Software Testing** course. The goal was to practice manual testing, create detailed test cases, explore potential bugs, and reflect on the testing process.  
-
-
-
-**Zeljka Zujic**
