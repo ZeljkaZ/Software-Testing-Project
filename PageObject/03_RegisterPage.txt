@@ -1,0 +1,213 @@
+
+### **User Registration TestSuite (Collection of Test Cases) Overview**
+
+#******************** Settings ************************
+
+*** Settings ***
+
+Documentation: 
+
+Testing the registration page.
+Test scenarios include positive tests for valid data entry, and negative tests for invalid inputs 
+(for example, empty fields, invalid email, invalid or weak password). The goal is to make sure 
+that account creation works correctly and correct error messages are displayed based on context.
+
+
+Pre Condition - Open browser
+Post Condition - Closed all browsers
+Tags - Register, TS-2-Register 
+
+#******************* Common Variables ********************
+
+*** Variables ***
+
+SignUp_Url = https://gitlab.com/users/sign_up
+
+# Note: Variables provided below are just example credentials for the test cases.
+# For actual test execution, replace these with real credentials following the same format.
+# Do not upload real credentials to GitHub or share them online.
+
+First_Name = Zeljka    # any other input for first name is also valid (numbers, special characters, space in between names) as long as the field is not empty
+Last_Name = Zujic   # the same explanation as above goes for last name input
+Valid_Username = zeljkazujic91   # use of alphanumeric values is recommended, however using - or _ is still accepted by system
+Alternative_Username = zeljka_zz # another valid user name, for test cases where user name cannot be repeated
+Valid_Email = *************@gmail.com   # a valid email needs to follow this structiure
+Alternative_Email = name_surname@mail.com  # another valid email, for test cases where email cannot be repeated
+Valid_Password = **************   # valid password is 8-128 characters long, can not include common phrases or user data
+
+Empty =      
+
+Invalid_Email = zeljka.zujic.mail.com.  # follows incorrect format
+Used_Email = *************@gmail.com   # This email is already used for registration, so new account can not be created with the same email
+Invalid_Username = zz zujic 91   # includes spaces 
+Unavailable_Username = zeljka   # already used
+Short_Username = z  # user name needs to be at least 2 characters long
+Weak_Password = secretpassword   # includes common names such as "password"                
+Password_With_Name = zeljka76389   # includes user data
+Password_With_Username = zeljkazujic91_2255   # includes user data
+Password_With_Email =   ***********@gmail.com   # includes user email
+Short_Password = hi123     # too short, less than 8 characters
+Long_Password = a7m3k9t2b8q4z1x6n5c2v7p9l3s8d4g1h6j0k2m5n8r3t7w9y4b1c6v8f2g5h9j3k7l1m4p8q2r6s9t3w7x1y5z0n4d8a2m6k9t3b7q1z5x8n2c4v9p6l3s7d1g8h4j0k5m9n2r8t4w6y1b7c5v3f9g2h7j4k8l1m6p3q7 #loging with too long password
+
+
+#******************** Test Cases *************************
+
+*** Test Cases ***
+
+# Positive test cases
+
+Register user with valid username and password:
+    Navigate To Registration Page SignUp_Url
+    Input First Name  First_Name       
+    Input Last Name  Last_Name
+    Input Username  Valid_Username         
+    Input Email  Valid_Email               
+    Input Password  Valid_Password  
+    Accept that GitLab contact you regarding products, services or promotions (optional)          
+    Click Continue Button 
+    Confirm Email Address By Entering the Code
+    Verify page should contain Welcome screen 
+
+# Remember these credentials for Project Page tests
+
+# Negative test cases
+
+Register User With Empty Password
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Alternative_Username   # Another valid username to avoid conflict as the system does not support duplicate usernames
+    Input Email  Alternative_Email   # Another valid email as GitLab does not allow multiple registrations with the same email. This is just example of proper format, other valid email can be used          
+    Input Password  (empty)             
+    Accept that GitLab contact you regarding products, services or promotions (optional) 
+    Click Continue Button
+    Verify Password Field and Password Recommendations are Focused (Required)
+
+
+Register User With Invalid Email
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Alternative_Username
+    Input Email  Invalid_Email
+    Input Password  Valid_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain "Please provide a valid email address"
+
+# The browsers I used automatically completed reCAPTCHA, so I was not able to opt out of it
+# However, this is how I assume the test case for this situation would look like
+
+Register User Without Completing reCAPTCHA
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Alternative_Username
+    Input Email   Alternative_Email
+    Input Password  Valid_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Do NOT complete reCAPTCHA
+    Click Continue Button
+    Verify Page Should Contain "Please verify that you are not a robot"
+
+
+Register User With Empty First And Last Name
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  Empty
+    Input Last Name Empty
+    Input Username  Alternative_Username
+    Input Email  Alternative_Email
+    Input Password  Valid_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain "This field is required" for first and last name fields
+
+
+Register User With Used Username
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Unavailable_Username
+    Input Email  Alternative_Email
+    Input Password  Valid_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain  "Username is already taken"
+
+
+Register User With Used Email
+    Navigate To Registration Page  SignUp_Url
+    Input First Name   First_Name
+    Input Last Name  Last_Name
+    Input Username  Alternative_Username
+    Input Email  Used_Email
+    Input Password  Valid_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain "1 error prohibited this user from being saved: Email has already been taken"
+
+
+Register User With Short Username
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Short_Username
+    Input Email  Alternative_Email
+    Input Password  Valid_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain "Username is too short (minimum 2 characters)"
+
+
+Register User With Invalid Username
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  First_Name
+    Input Last Name   Last_Name
+    Input Username   Invalid_Username
+    Input Email   Alternative_Email
+    Input Password  Valid_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain  "Please create a username with only alphanumeric characters."
+
+
+Register User With Weak Password
+    Navigate To Registration Page  SignUp_Url
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Alternative_Username             
+    Input Email  Alternative_Email                 
+    Input Password  Weak_Password             
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain "Cannot use common phrases (e.g. "password")"
+
+
+Register User With Too Long Password
+    Navigate To Registration Page  SignUp_Url   
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Alternative_Username    
+    Input Email  Alternative_Email
+    Input Password  Long_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain "Must be between 8-128 characters"
+
+
+ Register User With Too Short Password
+    Navigate To Registration Page  SignUp_Url   
+    Input First Name  First_Name
+    Input Last Name  Last_Name
+    Input Username  Alternative_Username    
+    Input Email  Alternative_Email
+    Input Password  Short_Password
+    Accept that GitLab contact you regarding products, services or promotions (optional)
+    Click Continue Button
+    Verify Page Should Contain "Must be between 8-128 characters"
+   
+
+
+
+
+

@@ -1,0 +1,212 @@
+
+#******************** Settings ************************
+
+*** Settings ***
+
+Documentation  Testing the Project page in GitLab. This test suite includes test cases that cover CRUD operations 
+(Creating, Reading, Updating and Deleting projects). Both positive and negative scenarios are included to check that
+projects are created successfully and that the system shows error messages when invalid data is used.
+
+
+Pre Condition  User is registered and logged in
+Post Condition	User logs out and closes browser
+Tags  Project, TS-3-Project, CRUD 
+
+#******************* Common Variables ********************
+
+*** Variables *** 
+
+# NOTE: Please do not upload real credentials to GitHub or share them online.
+# The variables below are examples for test cases.
+
+Project_Page_Url = https://gitlab.com/dashboard/projects 
+
+Valid_Project_Name = My Project      
+Template_Project_Name = My Template Project 
+Extra_Project_Name = Test Project  
+Project_Group = zz-group-3
+Project_Slug = my-project
+Updated_Project_Name = ZZ Project
+Alternative_Project_Slug = my-template-project
+Extra_Project_Slug = my-project-222
+Spare_Project_Slug = other-project
+Alternative_Project_Name = Second Project
+Alternative_Project_Group = zeljkazujic91
+
+Empty =
+
+Invalid_Project_Name = !project
+Duplicate_Project_Name = My Project   
+Duplicate_Project_Group = zz-group-3                
+
+
+
+#******************** Test Cases *************************
+
+*** Test Cases ***
+
+# Positive test cases
+
+Create Blank Project
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create Blank Project
+    Input Project Name   Valid_Project_Name
+	Pick a Group or Namespace   Project_Group
+	Input Project Slug (Optional)   Project_Slug  # This step can be skipped as project name is automatically added as a project slug
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+	Complete Project Configuration (Optional)
+	Toggle Experimental Settings (Optional)
+    Click Create Project Button
+    Verify Page Should Contain  "Project 'Valid_Project_Name' was successfully created."
+
+
+Create Template Project
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create From Template
+	Choose One Of The Templates
+	Click Use Template
+    Input Project Name   Template_Project_Name
+	Pick a Group or Namespace  Project_Group
+	Pick a Project Slug  Alternative_Project_Slug  # Optional step, as system automatically adds project slug
+	Add Project Description (Optional)
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+    Click Create Project Button
+	Wait For Importing of Project To Be Complete
+    Verify Page Should Contain   "The Project Was Successfully Imported"
+
+
+Update Name Of Template Project
+    Navigate To Project Page  Project_Page_Url
+	Click Members
+    Select Project   Template_Project_Name
+	Choose 3 Dots In The Upper Right Corner
+	Select Project Settings
+    Change Project Name   Updated_Project_Name
+    Click Save Changes Button
+    Verify Page Should Contain   "Project 'Updated_Project_Name' was successfully updated."
+
+
+Delete Template Project
+    Navigate To Project Page  Project_Page_Url
+	Click Members
+    Select Project   Template_Project_Name
+	Choose 3 Dots In The Upper Right Corner
+	Select Project Settings
+	Select Advanced
+    Click Delete Button
+	Enter Suggested Info To Confirm (e.g. zz-group3/my-template-project or similar path)
+    Confirm Deletion
+    Verify Page Should Contain Project Deletion Schedule
+
+
+Create Project With Used Project Name but Different Namespace (Group)
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create Blank Project
+    Input Project Name   Duplicate_Project_Name
+	Pick a Group or Namespace   Alternative_Project_Group
+	Input Project Slug   Project_Slug  # Optional step as project slug is automatically entered but can be changed manually
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+	Complete Project Configuration (Optional)
+	Toggle Experimental Settings (Optional)
+    Click Create Project Button
+    Verify Page Should Contain   "Project 'My Project' was successfully created."
+ 
+
+# Negative test cases
+
+
+Create Project With Used Project Name and Used Namespace (Group)
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create Blank Project
+    Input Project Name   Duplicate_Project_Name
+	Pick a Group or Namespace   Duplicate_Project_Group
+	Input Project Slug   Spare_Project_Slug
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+	Complete Project Configuration (Optional)
+	Toggle Experimental Settings (Optional)
+    Click Create Project Button
+    Verify Page Should Contain "Project namespace name has already been taken. Name has already been taken"
+ 
+
+Create Project With Empty Project Name 
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create Blank Project
+    Input Project Name   Empty
+	Pick a Group or Namespace   Project_Group
+	Input Project Slug   Empty   # The system does not allow entering project slug if project name is empty, otherwise project slug automatically becomes project name
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+	Complete Project Configuration (Optional)
+	Toggle Experimental Settings (Optional)
+    Click Create Project Button
+    Verify Page Should Contain "Please fill in this field." (project name)
+    
+
+Create Project With Invalid Project Name
+	Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create Blank Project
+    Input Project Name   Invalid_Project_Name
+	Pick a Group or Namespace   Project_Group
+	Skip Input Project Slug  # It is automatically added based off project name
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+	Complete Project Configuration (Optional)
+	Toggle Experimental Settings (Optional)
+    Click Create Project Button
+	Verify Page Should Contain  "The form contains the following error: Name can contain only letters, digits, emoji, '_', '.', '+', dashes, or spaces. It must start with a letter, digit, emoji, or '_'."
+    
+
+Create Project With Empty Project Group
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create Blank Project
+    Input Project Name   Extra_Project_Name
+	Pick a Group or Namespace   Empty
+	Skip Input Project Slug  # It is automatically added based off project name
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+	Complete Project Configuration (Optional)
+	Toggle Experimental Settings (Optional)
+    Click Create Project Button
+    Verify Page Should Contain   "Pick a group or namespace where you want to create this project."
+
+
+Create Project With Empty Project Slug
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create Blank Project
+    Input Project Name   Extra_Project_Name
+	Pick a Group or Namespace   Project_Group
+	Delete Suggested Project Slug   Empty
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+	Complete Project Configuration (Optional)
+	Toggle Experimental Settings (Optional)
+    Click Create Project Button
+    Verify Page Should Contain  "Please fill in this field." (Project slug)
+
+
+Create Template Project with Used Project Slug
+    Navigate To Project Page  Project_Page_Url
+    Click New Project
+	Choose Create From Template
+	Choose One Of The Templates
+	Click Use Template
+    Input Project Name   Alternative_Project_Name
+	Pick a Group or Namespace  Project_Group
+	Pick a Project Slug  Project_Slug
+	Add Project Description (Optional)
+	Select Deployment Target (Optional)
+	Select Visibility Level (Optional)
+    Click Create Project Button
+    Verify Page Should Contain "The form contains the following error: Path has already been taken"

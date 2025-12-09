@@ -1,0 +1,93 @@
+
+#******************** Settings ************************
+
+*** Settings ***
+Documentation	Testing the Issue Page in GitLab. This test suite covers basic CRUD operations (Create,
+Read, Update, Delete) for issues. It includes both positive and negative scenarios. 
+
+# TODO: Write Precondition and Postcondition, Tags 
+
+Pre Condition	User must be logged in and at least one project must be created by the user before 
+Post Condition	User logs off and closes browser
+Tags  Issue, TS-4-Issue, CRUD
+
+#******************* Common Variables ********************
+
+
+*** Variables ***
+
+# NOTE: Please do not upload real credentials to GitHub or share them online.
+# The variables below are examples for test cases.
+
+Projects_Url = https://gitlab.com/dashboard/projects
+
+Project_Name = My Project 
+Issue_Title = First Issue
+Updated_Issue_Title = Second Issue 
+Issue_Description = Generic description for testing purposes.
+
+Empty =
+
+
+#******************** Test Cases *************************
+
+*** Test Case ***
+
+# Positive Test Cases
+
+
+Create Issue
+    Navigate To Projects   Projects_Url
+    Open Project   Project_Name
+    Navigate To Issues Page
+    Click New Item Button
+    Input Issue Title   Issue_Title
+    Input Issue Description (Optional)   Issue_Description
+    Click Create Issue Button
+    Verify Page Should Contain  "Issue created. View details."
+
+
+Update Name Of Issue
+    Navigate To Project Page  Projects_Url
+    Open Project   Project_Name
+    Navigate To Issues Page
+    Click on Issue Title   Issue_Title
+    Click Edit Button
+    Update Issue Title   Updated_Issue_Title
+    Click Save Changes
+    Verify Page Should Display  Updated_Issue_Title
+
+
+Create Second Issue With Previously Updated Name
+    Navigate To Project Page  Projects_Url
+    Open Project   Project_Name
+    Navigate To Issues Page
+    Click New Item Button
+    Input Issue Title    Updated_Issue_Title
+    Input Issue Description (Optional)  Issue_Description
+    Click Create Issue Button
+    Verify Page Should Contain  "Issue created. View details."
+
+
+Delete First Issue
+    Navigate To Project Page  Projects_Url
+    Open Project   Project_Name
+    Navigate To Issues Page
+    Select Issue   Issue_Title
+    Click Three Dots in The Upper Right Corner 
+    Click Delete Issue Option
+    Confirm Deletion
+    Verify Issue Is No Longer Visible In Issue List
+
+
+# Negative Test Cases
+
+Creating Issue with Empty Issue Name
+	Navigate To Projects   Projects_Url
+    Open Project   Project_Name
+    Navigate To Issues Page
+    Click New Item Button
+    Do NOT Input Issue Title   Empty
+    Input Issue Description (Optional)   Issue_Description
+    Click Create Issue Button
+    Verify Page Should Contain  "A title is required" (focused title field)
